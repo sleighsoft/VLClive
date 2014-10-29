@@ -32,7 +32,8 @@ Livestreamer setup:
 2. On Mac OS X:
 
   1. Use the installation routine for Mac OS X: # easy_install -U livestreamer
-  2. Other distributions: not yet tested/supported
+  
+3. Other distributions: not yet tested/supported
 
 VLClive setup:
 
