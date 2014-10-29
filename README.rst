@@ -14,6 +14,8 @@ Current Capabilities
 Note: VLClive currently only works with twitch.tv streams but it is planned to support all the streams
 that are available for livestreamer in the future.
 
+Mac OS X has not yet been tested.
+
 - Add/Remove your favourite streamer for fast access
 - Quickly check if your favourite streamers are online
 - Use all available quality settings.
