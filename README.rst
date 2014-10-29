@@ -25,15 +25,19 @@ Installation
 Livestreamer setup:
 
 1. On Windows:
+
  * Download the livestreamer zip file located here: http://livestreamer.readthedocs.org/en/latest/install.html#windows-binaries
  * Unzip the folder and move its content to your_vlc_installation_folder/vlclive/livestreamer/<livestreamer_files>
+ 
 2. On Mac OS X:
+
  * Use the installation routine for Mac OS X: # easy_install -U livestreamer
  * Other distributions: not yet tested/supported
 
 VLClive setup:
 
 1. Copy the file VLClive.lua into the following folder:
+
  * Windows: your_vlc_installation_folder/lua/extensions
  * Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions
 
