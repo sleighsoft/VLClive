@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/chrippa/livestreamer/issues.
+Report bugs at https://github.com/sleighsoft/VLClive/issues.
 
 If you are reporting a bug, please include:
 
