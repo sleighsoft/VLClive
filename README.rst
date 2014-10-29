@@ -22,31 +22,7 @@ that are available for livestreamer in the future.
 Installation
 ------------
 
-<ol>
-    <li>Livestreamer setup:
-        <ol>
-            <li>On Windows:
-                <ul>
-                    <li>Download the livestreamer zip file located here: http://livestreamer.readthedocs.org/en/latest/install.html#windows-binaries</li>
-                    <li>Unzip the folder and move its content to your_vlc_installation_folder/vlclive/livestreamer/<livestreamer_files></li>
-                </ul>
-            </li>
-            <li>On Mac OS X:
-                <ul>
-                    <li>Use the installation routine for Mac OS X: # easy_install -U livestreamer</li>
-                </ul>
-            </li>
-            <li>Other distributions: not yet tested/supported</li>
-        </ol>
-    </li>
-    <li> Copy the file VLClive.lua into the following folder:
-        <ul>
-            <li>Windows: your_vlc_installation_folder/lua/extensions</li>
-            <li>Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions</li>
-        </ul>
-    </li>
-    <li>Your done! Start using it from the VLC extension tab.</li>
-</ol>
+<ol> <li>Livestreamer setup: <ol> <li>On Windows: <ul> <li>Download the livestreamer zip file located here: http://livestreamer.readthedocs.org/en/latest/install.html#windows-binaries</li><li>Unzip the folder and move its content to your_vlc_installation_folder/vlclive/livestreamer/<livestreamer_files></li></ul> </li><li>On Mac OS X: <ul> <li>Use the installation routine for Mac OS X: # easy_install -U livestreamer</li></ul> </li><li>Other distributions: not yet tested/supported</li></ol> </li><li> Copy the file VLClive.lua into the following folder: <ul> <li>Windows: your_vlc_installation_folder/lua/extensions</li><li>Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions</li></ul> </li><li>Your done! Start using it from the VLC extension tab.</li></ol>
 
 Contributing
 ------------
