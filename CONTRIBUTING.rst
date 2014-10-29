@@ -54,5 +54,6 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated.
 3. When creating a pull request, make sure it's on the correct branch.
    These branches are currently used:
+
    - master: Only critical fixes that needs to be released ASAP.
    - develop: Everything else.
