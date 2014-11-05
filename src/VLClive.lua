@@ -60,14 +60,33 @@ vlclive = {
 		livestreamer = nil
 	},
 	streamerOfflineText = 'OFF',
-	streamerOnlineText = 'ONLINE'
+	streamerOnlineText = 'ONLINE',
+	quality = {
+		twitch = {
+			"Source", "High", "Medium", "Low", "Mobile", "Audio"
+		}
+	},
+	default_LivestreamBaseName = "twitch",
+	livestreamBaseURLs = {
+		twitch = "twitch.tv/"
+	}
 }
 
+
+
 local widget_table = {}
+local dlg = nil
+local current_LivestreamBaseName = vlclive.default_LivestreamBaseName
+local current_LivesteramBaseURL = vlclive.livestreamBaseURLs[current_LivestreamBaseName]
+local current_QualitySettings = vlclive.quality[current_LivestreamBaseName]
+
 
 -- Custom part, Dialog box example: -------------------------
 
 function create_MainDialog()
+	-- widget_table['livestream_site_lable'] = dlg:add_label('Livestream Site: ', 1, 1, 1, 1)
+	-- widget_table['livestream_site_dropdown'] = dlg:add_dropdown(2, 1, 2, 1)
+	-- widget_table['livestream_site_load'] = dlg:add_button('Load Site', loadSite_Action, 4, 1, 2, 1)
   	widget_table['streamer_name_lable'] = dlg:add_label('Streamer Channel: ', 1, 1, 1, 1)
     widget_table['streamer_name_input'] = dlg:add_text_input('', 2, 1, 2, 1)
     widget_table['streamer_add_button'] = dlg:add_button('Add', addFav_Action, 4, 1, 1, 1)
@@ -77,15 +96,13 @@ function create_MainDialog()
    	widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, 2, 1, 1)
    	widget_table['livestreamer_quality_lable'] = dlg:add_label('Quality: ', 1, 3, 1, 1)
    	widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, 3, 2, 1)
-   	widget_table['livestreamer_quality_dropdown']:add_value('Source', 1)
-   	widget_table['livestreamer_quality_dropdown']:add_value('High', 2)
-   	widget_table['livestreamer_quality_dropdown']:add_value('Medium', 3)
-   	widget_table['livestreamer_quality_dropdown']:add_value('Low', 4)
-   	widget_table['livestreamer_quality_dropdown']:add_value('Mobile', 5)
-   	widget_table['livestreamer_quality_dropdown']:add_value('Audio', 6)
+
+   	table.foreach(current_QualitySettings, add_to_qualityDropdown)
+
    	widget_table['watch_button'] = dlg:add_button('Watch!',watch_Action, 5, 3, 1, 1)
 
 	local datadir = vlc.config.datadir()
+	vlc.msg.dbg("DATADIR: " .. datadir)
   	if is_window_path(datadir) then
 		vlclive.os = 'win'
 		slash = '\\'
@@ -102,12 +119,15 @@ function create_MainDialog()
 	else
 		-- Assume livestreamer is installed as a terminal shortcut e.g. >livestreamer ....
 		vlclive.path.livestreamer = 'livestreamer'
+
+		if string.find(datadir, 'MacOS') ~= nil then
+			vlclive.path.vlcexe = string.gsub(datadir, 'share', 'VLC')
+			vlclive.os = 'mac'
+		end
 	end
 	
 	if vlclive.path.rootpath then
-		if not is_dir(vlclive.path.rootpath) and
-		(vlclive.os == 'lin'  or
-		is_win_safe(vlclive.path.rootpath)) then
+		if not is_dir(vlclive.path.rootpath) then
 			mkdir_p(vlclive.path.rootpath)
 			vlc.msg.dbg('Creating dir ' .. vlclive.path.rootpath)
 		end
@@ -123,7 +143,6 @@ function create_MainDialog()
 
    	savedStreamers = loadStreamersFromConfig()
    	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
-   	streamerDropdownCounter = 1
    	if savedStreamers ~= nil then
    		table.foreach(savedStreamers, add_to_streamerDropdown)
    	else
@@ -162,31 +181,31 @@ function close_dlg()
 	collectgarbage() --~ !important	
 end
 
+function loadSite_Action()
+	-- This is to load the site url and all stored information
+end
+
 function watch_Action()
   	local input_string = widget_table['streamer_name_input']:get_text()
-  	local dropdown_string = widget_table['streamer_favourites_dropdown']:get_text()
-  	local quality_string = widget_table['livestreamer_quality_dropdown']:get_text()
-  	if quality_string == nil then
-  		quality_string = 'Source'
-  	end
-  	if dropdown_string == nil or dropdown_string == "----" then
+  	local dropdown_string = widget_table['streamer_favourites_dropdown']:get_value()
+  	local quality_string = widget_table['livestreamer_quality_dropdown']:get_value()
+  	quality_string = current_QualitySettings[quality_string]
+  	if dropdown_string == 0 then
   		dropdown_string = ''
   	else
-  		dropdown_string = string.gsub(dropdown_string, ' %(' .. vlclive.streamerOnlineText .. '%)', '')
-  		vlc.msg.dbg('First: ' .. dropdown_string)
-  		dropdown_string = string.gsub(dropdown_string, ' %(' .. vlclive.streamerOfflineText .. '%)', '')
-  		vlc.msg.dbg('Second: ' .. dropdown_string)
-  		input_string = dropdown_string
-  		dropdown_string = ''
+  		input_string = savedStreamers[dropdown_string]
   	end
   	vlc.msg.dbg(input_string)
-  	vlc.msg.dbg(dropdown_string)
-  	if input_string ~= '' and dropdown_string == '' then
+  	if input_string ~= '' and input_string ~= nil then
   		local cmd = ''
   		if vlclive.os == 'win' then
-  			cmd = 'start /min "" ' .. vlclive.path.livestreamer .. ' twitch.tv/' .. input_string .. ' ' .. quality_string .. ' --player ' .. vlclive.path.vlcexe .. '& exit'
-  		elseif vlclive.os == 'lin' then
-  			cmd = vlclive.path.livestreamer .. ' twitch.tv/' .. input_string .. ' ' .. quality_string .. ' --player ' .. vlclive.path.vlcexe
+  			cmd = 'start /min "" ' .. vlclive.path.livestreamer .. ' ' .. current_LivesteramBaseURL .. input_string .. ' ' .. quality_string .. ' --player ' .. vlclive.path.vlcexe .. '& exit'
+  		elseif vlclive.os == 'mac' then
+  			vlc.msg.dbg("Livestreamer: " .. vlclive.path.livestreamer)
+  			vlc.msg.dbg("BaseURL: " .. current_LivesteramBaseURL)
+  			vlc.msg.dbg("Quality: " .. quality_string)
+  			vlc.msg.dbg("Exepath: " .. vlclive.path.vlcexe)
+  			cmd = "osascript -e 'tell application \"Terminal\" to do script \"" .. vlclive.path.livestreamer .. ' ' .. current_LivesteramBaseURL .. input_string .. ' ' .. quality_string .. " && exit\"'"
   		end
    		vlc.msg.dbg(cmd)
   		os.execute(cmd)
@@ -210,8 +229,12 @@ end
 
 function add_to_streamerDropdown(index)
 	local streamerName = savedStreamers[index]
-	widget_table['streamer_favourites_dropdown']:add_value(streamerName, streamerDropdownCounter)
-	streamerDropdownCounter = streamerDropdownCounter + 1
+	widget_table['streamer_favourites_dropdown']:add_value(streamerName, index)
+end
+
+function add_to_qualityDropdown(index)
+	local qualityName =	current_QualitySettings[index]
+	widget_table['livestreamer_quality_dropdown']:add_value(qualityName, index)
 end
 
 function is_online(tStreamerNames)
