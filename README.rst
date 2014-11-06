@@ -44,7 +44,7 @@ VLClive setup:
   1. Windows: your_vlc_installation_folder/lua/extensions
   2. Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions
 
-Your done! Start using it from the VLC extension tab.</li>
+Your done! Start using it from the VLC extension tab.
 
 
 Contributing
