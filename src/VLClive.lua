@@ -57,7 +57,8 @@ vlclive = {
 	path = {
 		rootpath = nil,
 		configfile = nil,
-		livestreamer = nil
+		livestreamer = nil,
+		extension = nil
 	},
 	streamerOfflineText = 'OFF',
 	streamerOnlineText = 'ONLINE',
@@ -116,6 +117,7 @@ function create_MainDialog()
 	if vlclive.os == 'win' then
 		vlclive.path.livestreamer = vlclive.path.rootpath .. 'livestreamer' .. slash .. 'livestreamer.exe'
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
+		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extension' .. slash .. 'vlclive.lua'
 	else
 		-- Assume livestreamer is installed as a terminal shortcut e.g. >livestreamer ....
 		vlclive.path.livestreamer = 'livestreamer'
