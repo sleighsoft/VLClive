@@ -199,7 +199,7 @@ function watch_Action()
   	if input_string ~= '' and input_string ~= nil then
   		local cmd = ''
   		if vlclive.os == 'win' then
-  			cmd = 'start /min "" ' .. vlclive.path.livestreamer .. ' ' .. current_LivesteramBaseURL .. input_string .. ' ' .. quality_string .. ' --player ' .. vlclive.path.vlcexe .. '& exit'
+  			cmd = 'start /min "" "' .. vlclive.path.livestreamer .. '" ' .. current_LivesteramBaseURL .. input_string .. ' ' .. quality_string .. ' --player "' .. vlclive.path.vlcexe .. '" & exit'
   		elseif vlclive.os == 'mac' then
   			vlc.msg.dbg("Livestreamer: " .. vlclive.path.livestreamer)
   			vlc.msg.dbg("BaseURL: " .. current_LivesteramBaseURL)
