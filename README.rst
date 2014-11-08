@@ -14,8 +14,6 @@ Current Capabilities
 Note: VLClive currently only works with twitch.tv streams but it is planned to support all the streams
 that are available for livestreamer in the future.
 
-Mac OS X has not yet been tested.
-
 - Add/Remove your favourite streamer for fast access
 - Quickly check if your favourite streamers are online
 - Use all available quality settings.
@@ -44,7 +42,7 @@ VLClive setup:
   1. Windows: your_vlc_installation_folder/lua/extensions
   2. Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions
 
-Your done! Start using it from the VLC extension tab.</li>
+Your done! Start using it from the VLC extension tab.
 
 
 Contributing
