@@ -365,9 +365,10 @@ end
 function mkdir_p(path) -- create a directory windows or linux via commandline
 	if not path or trim(path) == ''
 	then return false end
+	vlc.msg.dbg(vlclive.os)
 	if vlclive.os == 'win' then
 		os.execute('mkdir "' .. path ..'"')
-	elseif vlclive.os == "lin" then
+	elseif vlclive.os == "lin" or vlclive.os == "mac" then
 		os.execute("mkdir -p '" .. path .."'")
 	end
 end
