@@ -1,4 +1,5 @@
--- 00000001
+-- 00000000
+-- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
 Copyright (c) 2014 sleighsoft
@@ -19,38 +20,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --]]
 function descriptor()
-   return {
-      title = "VLClive",
-      version = "0.7",
-      author = "Julian Niedermeier",
-      url = 'http://',
-      shortdesc = "VLClive",
-      description = "Integrates Livestreamer into VLC for easier handling of currently only twitch.tv streams.",
-      capabilities = {"menu", "input-listener", "meta-listener"}
-   }
+	return {
+		title = "VLClive",
+		version = "0.8",
+		author = "Julian Niedermeier",
+		url = 'http://',
+		shortdesc = "VLClive",
+		description = "Integrates Livestreamer into VLC for easier handling of currently only twitch.tv streams.",
+		capabilities = {"menu", "input-listener", "meta-listener"}
+	}
 end
 
 function activate()
-   -- this is where extension starts
-   -- for example activation of extension opens custom dialog box:
-   show_Main()
+	-- this is where extension starts
+	-- for example activation of extension opens custom dialog box:
+	setup()
+	if not update_extension_via_github() then
+		show_Main()
+	else
+		show_Update()
+	end
 end
 function deactivate()
-   -- what should be done on deactivation of extension
+	-- what should be done on deactivation of extension
 end
 function close()
-   -- function triggered on dialog box close event
-   -- for example to deactivate extension on dialog box close:
-   vlc.deactivate()
+	-- function triggered on dialog box close event
+	-- for example to deactivate extension on dialog box close:
+	vlc.deactivate()
 end
 
 function input_changed()
-   -- related to capabilities={"input-listener"} in descriptor()
-   -- triggered by Start/Stop media input event
+	-- related to capabilities={"input-listener"} in descriptor()
+	-- triggered by Start/Stop media input event
 end
 function playing_changed()
-   -- related to capabilities={"playing-listener"} in descriptor()
-   -- triggered by Pause/Play madia input event
+	-- related to capabilities={"playing-listener"} in descriptor()
+	-- triggered by Pause/Play madia input event
 end
 
 vlclive = {
@@ -71,7 +77,8 @@ vlclive = {
 	default_LivestreamBaseName = "twitch",
 	livestreamBaseURLs = {
 		twitch = "twitch.tv/"
-	}
+	},
+	githubSrcFile = "https://raw.githubusercontent.com/sleighsoft/VLClive/develop/src/VLClive.lua"
 }
 
 
@@ -85,24 +92,7 @@ local current_QualitySettings = vlclive.quality[current_LivestreamBaseName]
 
 -- Custom part, Dialog box example: -------------------------
 
-function create_MainDialog()
-	-- widget_table['livestream_site_lable'] = dlg:add_label('Livestream Site: ', 1, 1, 1, 1)
-	-- widget_table['livestream_site_dropdown'] = dlg:add_dropdown(2, 1, 2, 1)
-	-- widget_table['livestream_site_load'] = dlg:add_button('Load Site', loadSite_Action, 4, 1, 2, 1)
-  	widget_table['streamer_name_lable'] = dlg:add_label('Streamer Channel: ', 1, 1, 1, 1)
-    widget_table['streamer_name_input'] = dlg:add_text_input('', 2, 1, 2, 1)
-    widget_table['streamer_add_button'] = dlg:add_button('Add', addFav_Action, 4, 1, 1, 1)
-    widget_table['streamer_remove_button'] = dlg:add_button('Remove', removeFav_Action, 5, 1, 1, 1)
-    widget_table['streamer_favourites_lable'] = dlg:add_label('Favourites: ', 1, 2, 1, 1)
-   	widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, 2, 2, 1)
-   	widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, 2, 1, 1)
-   	widget_table['livestreamer_quality_lable'] = dlg:add_label('Quality: ', 1, 3, 1, 1)
-   	widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, 3, 2, 1)
-
-   	table.foreach(current_QualitySettings, add_to_qualityDropdown)
-
-   	widget_table['watch_button'] = dlg:add_button('Watch!',watch_Action, 5, 3, 1, 1)
-
+function setup()
 	local datadir = vlc.config.datadir()
 	vlc.msg.dbg("DATADIR: " .. datadir)
   	if is_window_path(datadir) then
@@ -118,7 +108,7 @@ function create_MainDialog()
 	if vlclive.os == 'win' then
 		vlclive.path.livestreamer = vlclive.path.rootpath .. 'livestreamer' .. slash .. 'livestreamer.exe'
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
-		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extension' .. slash .. 'vlclive.lua'
+		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. 'VLClive.lua'
 	else
 		-- Assume livestreamer is installed as a terminal shortcut e.g. >livestreamer ....
 		vlclive.path.livestreamer = 'livestreamer'
@@ -143,6 +133,23 @@ function create_MainDialog()
 			fconf:close()
 		end
 	end
+end
+
+function create_MainDialog()
+	-- widget_table['livestream_site_lable'] = dlg:add_label('Livestream Site: ', 1, 1, 1, 1)
+	-- widget_table['livestream_site_dropdown'] = dlg:add_dropdown(2, 1, 2, 1)
+	-- widget_table['livestream_site_load'] = dlg:add_button('Load Site', loadSite_Action, 4, 1, 2, 1)
+  	widget_table['streamer_name_lable'] = dlg:add_label('Streamer Channel: ', 1, 1, 1, 1)
+    widget_table['streamer_name_input'] = dlg:add_text_input('', 2, 1, 2, 1)
+    widget_table['streamer_add_button'] = dlg:add_button('Add', addFav_Action, 4, 1, 1, 1)
+    widget_table['streamer_remove_button'] = dlg:add_button('Remove', removeFav_Action, 5, 1, 1, 1)
+    widget_table['streamer_favourites_lable'] = dlg:add_label('Favourites: ', 1, 2, 1, 1)
+   	widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, 2, 2, 1)
+   	widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, 2, 1, 1)
+   	widget_table['livestreamer_quality_lable'] = dlg:add_label('Quality: ', 1, 3, 1, 1)
+   	widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, 3, 2, 1)
+   	table.foreach(current_QualitySettings, add_to_qualityDropdown)
+   	widget_table['watch_button'] = dlg:add_button('Watch!',watch_Action, 5, 3, 1, 1)
 
    	savedStreamers = loadStreamersFromConfig()
    	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
@@ -153,23 +160,34 @@ function create_MainDialog()
    	end
 end
 
+function create_UpdateDialog()
+	widget_table['update_lable'] = dlg:add_label('Extension updated! Reload it to apply the update')
+end
+
 function create_SettingsDialog()
 	widget_table['livestreamer_path_lable'] = dlg:add_label('Path to livestreamer.exe', 1, 1, 1, 1)
 	widget_table['livestreamer_path_input'] = dlg:add_text_input(1, 2, 1, 1)
 	widget_table['settings_save_button'] = dlg:add_button('Save', settings_Save_Action, 1, 3, 1, 1)
 end
 
-
 function trigger_menu(dlgId)
 	if dlgId == 1 then
 		close_dlg()
 		dlg = vlc.dialog('VLC Livestreamer Integration')
 		create_MainDialog()
+	elseif dlgId == 2 then
+		close_dlg()
+		dlg = vlc.dialog('Extension Update. Please Reload!')
+		create_UpdateDialog()
 	end
 end
 
 function show_Main()
 	trigger_menu(1)
+end
+
+function show_Update()
+	trigger_menu(2)
 end
 
 function close_dlg()
@@ -182,10 +200,6 @@ function close_dlg()
 	widget_table = nil
 	widget_table = {}
 	collectgarbage() --~ !important	
-end
-
-function loadSite_Action()
-	-- This is to load the site url and all stored information
 end
 
 function watch_Action()
@@ -309,6 +323,15 @@ function loadStreamersFromConfig()
 	return read_lines(vlclive.path.configfile)
 end
 
+function read_line(filepath)
+	if file_exist(filepath) then
+		local file = io.open(filepath, 'r')
+		local line = file:read('*line')
+		return line
+	end
+	return ''
+end
+
 function read_lines(filepath) -- read lines from a file into a table
 	if file_exist(filepath) then
 		local tLines = {}
@@ -406,4 +429,37 @@ function is_dir(path) -- checks if given path is a directory
 	end
 	
 	return false
+end
+
+function update_extension_via_github()
+	-- check online github version number
+	local stream = vlc.stream(vlclive.githubSrcFile)
+   	local data = stream:readline()
+   	stream = nil
+   	local github_version_number = string.gsub(data, '-- ', '')
+   	data = nil
+   	vlc.msg.dbg(github_version_number)
+   	-- check local version number
+   	vlc.msg.dbg(vlclive.path.extension)
+   	local local_version_number = string.gsub(read_line(vlclive.path.extension), '-- ', '')
+
+   	if local_version_number < github_version_number then
+   		vlc.msg.dbg('UPGRADE')
+   		local stream = vlc.stream(vlclive.githubSrcFile)
+		local data = ""
+		local extension_file = io.open(vlclive.path.extension, "w+")
+	   
+		while data do
+			extension_file:write(data)
+			data = stream:read(65536)
+		end
+
+		extension_file:flush()
+		extension_file:close()
+		stream = nil
+		collectgarbage()
+
+		return true
+   	end
+   	return false
 end
