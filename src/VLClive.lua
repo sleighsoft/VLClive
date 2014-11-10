@@ -78,7 +78,8 @@ vlclive = {
 	livestreamBaseURLs = {
 		twitch = "twitch.tv/"
 	},
-	githubSrcFile = "https://raw.githubusercontent.com/sleighsoft/VLClive/develop/src/VLClive.lua"
+	githubSrcFile = "https://raw.githubusercontent.com/sleighsoft/VLClive/develop/src/VLClive.lua",
+	localSrcFileName = 'VLClive.lua'
 }
 
 
@@ -108,7 +109,7 @@ function setup()
 	if vlclive.os == 'win' then
 		vlclive.path.livestreamer = vlclive.path.rootpath .. 'livestreamer' .. slash .. 'livestreamer.exe'
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
-		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. 'VLClive.lua'
+		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. localSrcFileName
 	else
 		-- Assume livestreamer is installed as a terminal shortcut e.g. >livestreamer ....
 		vlclive.path.livestreamer = 'livestreamer'
@@ -116,6 +117,7 @@ function setup()
 		if string.find(datadir, 'MacOS') ~= nil then
 			vlclive.path.vlcexe = string.gsub(datadir, 'share', 'VLC')
 			vlclive.os = 'mac'
+			vlclive.path.extension = string.gsub(vlclive.path.rootpath, 'vlclive', 'lua' .. slash .. 'extensions' .. slash .. localSrcFileName)
 		end
 	end
 	
