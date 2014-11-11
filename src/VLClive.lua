@@ -1,4 +1,4 @@
--- 00000001
+-- 00000000
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -22,7 +22,7 @@ SOFTWARE.
 function descriptor()
 	return {
 		title = "VLClive",
-		version = "0.8",
+		version = vlclive.version,
 		author = "Julian Niedermeier",
 		url = 'http://',
 		shortdesc = "VLClive",
@@ -41,9 +41,11 @@ function activate()
 		show_Update()
 	end
 end
+
 function deactivate()
 	-- what should be done on deactivation of extension
 end
+
 function close()
 	-- function triggered on dialog box close event
 	-- for example to deactivate extension on dialog box close:
@@ -54,12 +56,14 @@ function input_changed()
 	-- related to capabilities={"input-listener"} in descriptor()
 	-- triggered by Start/Stop media input event
 end
+
 function playing_changed()
 	-- related to capabilities={"playing-listener"} in descriptor()
 	-- triggered by Pause/Play madia input event
 end
 
 vlclive = {
+	version = 'v0.8',
 	os = nil,
 	path = {
 		rootpath = nil,
@@ -109,7 +113,7 @@ function setup()
 	if vlclive.os == 'win' then
 		vlclive.path.livestreamer = vlclive.path.rootpath .. 'livestreamer' .. slash .. 'livestreamer.exe'
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
-		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. localSrcFileName
+		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 	else
 		-- Assume livestreamer is installed as a terminal shortcut e.g. >livestreamer ....
 		vlclive.path.livestreamer = 'livestreamer'
@@ -117,7 +121,7 @@ function setup()
 		if string.find(datadir, 'MacOS') ~= nil then
 			vlclive.path.vlcexe = string.gsub(datadir, 'share', 'VLC')
 			vlclive.os = 'mac'
-			vlclive.path.extension = string.gsub(vlclive.path.rootpath, 'vlclive', 'lua' .. slash .. 'extensions' .. slash .. localSrcFileName)
+			vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 		end
 	end
 	
@@ -135,6 +139,7 @@ function setup()
 			fconf:close()
 		end
 	end
+	vlc.msg.dbg("Extension path: " .. vlclive.path.extension)
 end
 
 function create_MainDialog()
@@ -163,7 +168,7 @@ function create_MainDialog()
 end
 
 function create_UpdateDialog()
-	widget_table['update_lable'] = dlg:add_label('Extension updated! Reload it to apply the update')
+	widget_table['update_lable'] = dlg:add_label('Extension updated! Restart it to apply the update', 1, 1, 1, 1)
 end
 
 function create_SettingsDialog()
@@ -175,11 +180,11 @@ end
 function trigger_menu(dlgId)
 	if dlgId == 1 then
 		close_dlg()
-		dlg = vlc.dialog('VLC Livestreamer Integration')
+		dlg = vlc.dialog('VLClive ' .. vlclive.version)
 		create_MainDialog()
 	elseif dlgId == 2 then
 		close_dlg()
-		dlg = vlc.dialog('Extension Update. Please Reload!')
+		dlg = vlc.dialog('Extension Updated!')
 		create_UpdateDialog()
 	end
 end
@@ -446,7 +451,7 @@ function update_extension_via_github()
    	local local_version_number = string.gsub(read_line(vlclive.path.extension), '-- ', '')
 
    	if local_version_number < github_version_number then
-   		vlc.msg.dbg('UPGRADE')
+   		vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
    		local stream = vlc.stream(vlclive.githubSrcFile)
 		local data = ""
 		local extension_file = io.open(vlclive.path.extension, "w+")
@@ -460,7 +465,6 @@ function update_extension_via_github()
 		extension_file:close()
 		stream = nil
 		collectgarbage()
-
 		return true
    	end
    	return false
