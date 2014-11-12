@@ -1,12 +1,17 @@
 VLClive
 =======
 
+If you like it, think about donating :)
+
+.. image:: https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif
+    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55J29E7JKV3GU
+
 Overview
 --------
 
 VLClive is an extension that integrates livestreamer (https://github.com/chrippa/livestreamer)
 into the famous VLC media player.
-VLClive is written in Lua and uses the VLC Lua plugin interface.
+VLClive is written in LUA and uses the VLC Lua plugin interface.
 
 Current Capabilities
 --------------------
@@ -17,7 +22,6 @@ that are available for livestreamer in the future.
 - Add/Remove your favourite streamer for fast access
 - Quickly check if your favourite streamers are online
 - Use all available quality settings.
-- Automatic VLClive.lua script updates with each new realease (since version v0.8)
 
 
 Installation
@@ -43,9 +47,7 @@ VLClive setup:
   1. Windows: your_vlc_installation_folder/lua/extensions
   2. Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions
 
-Your done! 
-
-Start using it from the VLC extensions tab.
+Your done! Start using it from the VLC extension tab.
 
 
 Contributing
