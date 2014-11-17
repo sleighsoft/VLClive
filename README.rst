@@ -1,7 +1,7 @@
 VLClive
 =======
 
-If you like it, think about donating :)
+If you like it, consider donating :)
 
 .. image:: https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif
     :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55J29E7JKV3GU
