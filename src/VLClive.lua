@@ -1,4 +1,4 @@
--- 00000000
+-- 00000001
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -30,6 +30,7 @@ function descriptor()
 		capabilities = {"menu", "input-listener", "meta-listener"}
 	}
 end
+
 
 function activate()
 	-- this is where extension starts
@@ -66,10 +67,11 @@ vlclive = {
 	version = 'v0.8',
 	os = nil,
 	path = {
-		rootpath = nil,
+		userdir = nil,
 		configfile = nil,
 		livestreamer = nil,
-		extension = nil
+		extension = nil,
+		vlcexe = nil
 	},
 	streamerOfflineText = 'OFF',
 	streamerOnlineText = 'ONLINE',
@@ -82,7 +84,7 @@ vlclive = {
 	livestreamBaseURLs = {
 		twitch = "twitch.tv/"
 	},
-	githubSrcFile = "https://raw.githubusercontent.com/sleighsoft/VLClive/develop/src/VLClive.lua",
+	githubSrcFile = "https://raw.githubusercontent.com/sleighsoft/VLClive/master/src/VLClive.lua",
 	localSrcFileName = 'VLClive.lua'
 }
 
@@ -99,36 +101,46 @@ local current_QualitySettings = vlclive.quality[current_LivestreamBaseName]
 
 function setup()
 	local datadir = vlc.config.datadir()
+	local userdatadir = vlc.config.userdatadir()
 	vlc.msg.dbg("DATADIR: " .. datadir)
+	vlc.msg.dbg("USERDATADIR: " .. userdatadir)
   	if is_window_path(datadir) then
 		vlclive.os = 'win'
 		slash = '\\'
 	else
+		-- Check for Mac specific code later
 		vlclive.os = 'lin'
 		slash = '/'
 	end
-	vlclive.path.rootpath = datadir .. slash .. 'vlclive' .. slash
-	vlclive.path.configfile = vlclive.path.rootpath .. 'vlclive.config'
 
+	local path_generic = {"lua", "extensions", "userdata", "vlclive"}
+	vlclive.path.userdir = userdatadir .. slash .. table.concat(path_generic, slash) .. slash
+	vlclive.path.configfile = vlclive.path.userdir .. 'vlclive.config'
 	if vlclive.os == 'win' then
-		vlclive.path.livestreamer = vlclive.path.rootpath .. 'livestreamer' .. slash .. 'livestreamer.exe'
+		vlclive.path.livestreamer = vlclive.path.userdir .. 'livestreamer' .. slash .. 'livestreamer.exe'
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
 		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 	else
-		-- Assume livestreamer is installed as a terminal shortcut e.g. >livestreamer ....
-		vlclive.path.livestreamer = 'livestreamer'
-
 		if string.find(datadir, 'MacOS') ~= nil then
 			vlclive.path.vlcexe = string.gsub(datadir, 'share', 'VLC')
 			vlclive.os = 'mac'
 			vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
+		else
+			-- Linux like path
+			vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 		end
 	end
+
+	-- Override livestreamer path if a console version is available
+	local consoleLivestreamerInstalled = os.execute('livestreamer')
+	if consoleLivestreamerInstalled == 0 then
+		vlclive.path.livestreamer = 'livestreamer'
+	end
 	
-	if vlclive.path.rootpath then
-		if not is_dir(vlclive.path.rootpath) then
-			mkdir_p(vlclive.path.rootpath)
-			vlc.msg.dbg('Creating dir ' .. vlclive.path.rootpath)
+	if vlclive.path.userdir then
+		if not is_dir(vlclive.path.userdir) then
+			mkdir_p(vlclive.path.userdir)
+			vlc.msg.dbg('Creating dir ' .. vlclive.path.userdir)
 		end
 	end
 
@@ -155,13 +167,20 @@ function create_MainDialog()
    	widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, 2, 1, 1)
    	widget_table['livestreamer_quality_lable'] = dlg:add_label('Quality: ', 1, 3, 1, 1)
    	widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, 3, 2, 1)
-   	table.foreach(current_QualitySettings, add_to_qualityDropdown)
+
+	for key,value in ipairs(current_QualitySettings) do
+		add_to_qualityDropdown(key, value)
+	end
+   	--table.foreach(current_QualitySettings, add_to_qualityDropdown)
    	widget_table['watch_button'] = dlg:add_button('Watch!',watch_Action, 5, 3, 1, 1)
 
    	savedStreamers = loadStreamersFromConfig()
    	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
    	if savedStreamers ~= nil then
-   		table.foreach(savedStreamers, add_to_streamerDropdown)
+		for key,value in ipairs(savedStreamers) do
+			add_to_streamerDropdown(key,value)
+		end
+   		--table.foreach(savedStreamers, add_to_streamerDropdown)
    	else
    		savedStreamers = {}
    	end
@@ -452,10 +471,14 @@ function update_extension_via_github()
 
    	if local_version_number < github_version_number then
    		vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
+
+
    		local stream = vlc.stream(vlclive.githubSrcFile)
 		local data = ""
 		local extension_file = io.open(vlclive.path.extension, "w+")
 	   
+		vlc.msg.dbg("The opened file is: " .. extension_file)
+
 		while data do
 			extension_file:write(data)
 			data = stream:read(65536)
