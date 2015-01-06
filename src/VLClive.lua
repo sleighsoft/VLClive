@@ -36,11 +36,11 @@ function activate()
 	-- this is where extension starts
 	-- for example activation of extension opens custom dialog box:
 	setup()
-	--if not update_extension_via_github() then
+	if not update_extension_via_github() then
 		show_Main()
-	--else
-	--	show_Update()
-	--end
+	else
+		show_Update()
+	end
 end
 
 function deactivate()
@@ -471,10 +471,14 @@ function update_extension_via_github()
 
    	if local_version_number < github_version_number then
    		vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
+
+
    		local stream = vlc.stream(vlclive.githubSrcFile)
 		local data = ""
 		local extension_file = io.open(vlclive.path.extension, "w+")
 	   
+		vlc.msg.dbg("The opened file is: " .. extension_file)
+
 		while data do
 			extension_file:write(data)
 			data = stream:read(65536)
