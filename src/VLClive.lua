@@ -1,4 +1,4 @@
--- 00000001
+-- 00000002
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -64,7 +64,7 @@ function playing_changed()
 end
 
 vlclive = {
-	version = 'v0.8',
+	version = 'v0.9',
 	os = nil,
 	path = {
 		userdir = nil,
@@ -112,12 +112,25 @@ function setup()
 		vlclive.os = 'lin'
 		slash = '/'
 	end
+	vlc.msg.dbg('OS is ' .. vlclive.os)
+
+	vlclive.path.livestreamer = 'livestreamer'
+	--[[
+	This has to be dependent on the lua version as lua 5.2 has a slightly different os.execute
+	implementation
+	-- Override livestreamer path if a console version is available
+	local consoleLivestreamerInstalled = os.execute('livestreamer')
+	vlc.msg.dbg('Livestreamer system call returned ' .. consoleLivestreamerInstalled)
+	if consoleLivestreamerInstalled == 0 then
+		vlclive.path.livestreamer = 'livestreamer'
+	end --]]
+	vlc.msg.dbg('Path ' .. vlclive.path.livestreamer)
 
 	local path_generic = {"lua", "extensions", "userdata", "vlclive"}
 	vlclive.path.userdir = userdatadir .. slash .. table.concat(path_generic, slash) .. slash
 	vlclive.path.configfile = vlclive.path.userdir .. 'vlclive.config'
+	
 	if vlclive.os == 'win' then
-		vlclive.path.livestreamer = vlclive.path.userdir .. 'livestreamer' .. slash .. 'livestreamer.exe'
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
 		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 	else
@@ -131,12 +144,6 @@ function setup()
 		end
 	end
 
-	-- Override livestreamer path if a console version is available
-	local consoleLivestreamerInstalled = os.execute('livestreamer')
-	if consoleLivestreamerInstalled == 0 then
-		vlclive.path.livestreamer = 'livestreamer'
-	end
-	
 	if vlclive.path.userdir then
 		if not is_dir(vlclive.path.userdir) then
 			mkdir_p(vlclive.path.userdir)
@@ -167,13 +174,17 @@ function create_MainDialog()
    	widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, 2, 1, 1)
    	widget_table['livestreamer_quality_lable'] = dlg:add_label('Quality: ', 1, 3, 1, 1)
    	widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, 3, 2, 1)
-   	table.foreach(current_QualitySettings, add_to_qualityDropdown)
+   	for key, value in ipairs(current_QualitySettings) do
+   		add_to_qualityDropdown(key, value)
+   	end
    	widget_table['watch_button'] = dlg:add_button('Watch!',watch_Action, 5, 3, 1, 1)
 
    	savedStreamers = loadStreamersFromConfig()
    	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
    	if savedStreamers ~= nil then
-   		table.foreach(savedStreamers, add_to_streamerDropdown)
+   		for key, value in ipairs(savedStreamers) do
+   			add_to_streamerDropdown(key, value)
+   		end
    	else
    		savedStreamers = {}
    	end
@@ -234,6 +245,7 @@ function watch_Action()
   	vlc.msg.dbg(input_string)
   	if input_string ~= '' and input_string ~= nil then
   		local cmd = ''
+  		vlc.msg.dbg('Executing livestreamer command for ' .. vlclive.os)
   		if vlclive.os == 'win' then
   			cmd = 'start /min "" "' .. vlclive.path.livestreamer .. '" ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string .. ' --player "' .. vlclive.path.vlcexe .. '" & exit'
   		elseif vlclive.os == 'mac' then
@@ -318,7 +330,9 @@ function removeFav_Action()
 	dlg:del_widget(widget_table['streamer_favourites_dropdown'])
 	widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, 2, 2, 1)
 	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
-	table.foreach(savedStreamers, add_to_streamerDropdown)
+	for key, value in ipairs(savedStreamers, add_to_streamerDropdown) do
+		add_to_streamerDropdown(key, value)
+	end
 end
 
 function table_contains_item(table, item)
