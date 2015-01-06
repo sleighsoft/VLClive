@@ -167,13 +167,20 @@ function create_MainDialog()
    	widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, 2, 1, 1)
    	widget_table['livestreamer_quality_lable'] = dlg:add_label('Quality: ', 1, 3, 1, 1)
    	widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, 3, 2, 1)
-   	table.foreach(current_QualitySettings, add_to_qualityDropdown)
+
+	for key,value in ipairs(current_QualitySettings) do
+		add_to_qualityDropdown(key, value)
+	end
+   	--table.foreach(current_QualitySettings, add_to_qualityDropdown)
    	widget_table['watch_button'] = dlg:add_button('Watch!',watch_Action, 5, 3, 1, 1)
 
    	savedStreamers = loadStreamersFromConfig()
    	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
    	if savedStreamers ~= nil then
-   		table.foreach(savedStreamers, add_to_streamerDropdown)
+		for key,value in ipairs(savedStreamers) do
+			add_to_streamerDropdown(key,value)
+		end
+   		--table.foreach(savedStreamers, add_to_streamerDropdown)
    	else
    		savedStreamers = {}
    	end
@@ -464,10 +471,14 @@ function update_extension_via_github()
 
    	if local_version_number < github_version_number then
    		vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
+
+
    		local stream = vlc.stream(vlclive.githubSrcFile)
 		local data = ""
 		local extension_file = io.open(vlclive.path.extension, "w+")
 	   
+		vlc.msg.dbg("The opened file is: " .. extension_file)
+
 		while data do
 			extension_file:write(data)
 			data = stream:read(65536)

@@ -42,12 +42,13 @@ Livestreamer setup:
 
 VLClive setup:
 
-1. Copy the file VLClive.lua into the following folder:
+2. Copy the file VLClive.lua into the following folder:
 
   1. Windows: your_vlc_installation_folder/lua/extensions
   2. Mac OS X: VLC > Show Package Contents -> Contents/MacOS/share/lua/extensions
+  3. Linux : /usr/share/vlc/lua/extensions (you might need to create the extensions folder)
 
-Your done! Start using it from the VLC extension tab.
+You're done! Start using it from the VLC extension tab.
 
 
 Contributing
