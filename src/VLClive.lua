@@ -140,7 +140,7 @@ function setup()
 			vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 		else
 			-- Linux like path
-			vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
+			vlclive.path.extension = userdatadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 		end
 	end
 
@@ -254,6 +254,11 @@ function watch_Action()
   			vlc.msg.dbg("Quality: " .. quality_string)
   			vlc.msg.dbg("Exepath: " .. vlclive.path.vlcexe)
   			cmd = "osascript -e 'tell application \"Terminal\" to do script \"" .. vlclive.path.livestreamer .. ' ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string .. " && exit\"'"
+   		elseif vlclive.os == 'lin' then
+  			vlc.msg.dbg("Livestreamer: " .. vlclive.path.livestreamer)
+  			vlc.msg.dbg("BaseURL: " .. current_LivestreamBaseURL)
+  			vlc.msg.dbg("Quality: " .. quality_string)
+  			cmd = vlclive.path.livestreamer .. ' ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string
   		end
    		vlc.msg.dbg(cmd)
   		os.execute(cmd)
@@ -481,7 +486,7 @@ function update_extension_via_github()
    		local stream = vlc.stream(vlclive.githubSrcFile)
 		local data = ""
 		local extension_file = io.open(vlclive.path.extension, "w+")
-	   
+                
 		while data do
 			extension_file:write(data)
 			data = stream:read(65536)
