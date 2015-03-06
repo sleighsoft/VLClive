@@ -34,7 +34,7 @@ Installation
 
 3. Place it in the correct folder:
 
-  * Windows: %ProgramFiles%\VideoLAN\VLC\lua\extensions\
+  * Windows: <Path_to_VLC_installation_directory>\\lua\\extensions\\
   * Linux: ~/.local/share/vlc/lua/extensions/
   * Mac OS X: /Applications/VLC.app/Contents/MacOS/share/lua/extensions/
 
