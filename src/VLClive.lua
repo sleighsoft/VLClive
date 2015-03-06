@@ -1,4 +1,4 @@
--- 00000002
+-- 00000003
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
