@@ -25,7 +25,7 @@ Installation
 1. Install Livestreamer: http://docs.livestreamer.io/install.html
 (If you use Windows, add it the the Path Variable as well!)
 
-2. Download the Lua file from /src/VLClive.lua from Github
+2. Download the Lua file from /src/VLClive.lua
 
 3. Place it in the correct folder:
 
@@ -36,6 +36,8 @@ Installation
 4. Run it from the 'View' tab in VLC
 
 5. Please report all bugs immediately :)
+
+6. Thank you for giving it a shot, much appreciated
 
 
 Contributing
