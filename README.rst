@@ -6,7 +6,7 @@ Overview
 
 VLClive is an extension that integrates livestreamer (https://github.com/chrippa/livestreamer)
 into the famous VLC media player.
-VLClive is written in LUA and uses the VLC Lua plugin interface.
+VLClive is written in Lua and uses the VLC Lua plugin interface.
 
 Current Capabilities
 --------------------
