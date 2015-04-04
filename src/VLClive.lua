@@ -134,7 +134,7 @@ function setup()
 		vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
 		vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
 	else
-		if string.find(datadir, 'MacOS') ~= nil then
+		if string.find(datadir, 'MacOS') then
 			vlclive.path.vlcexe = string.gsub(datadir, 'share', 'VLC')
 			vlclive.os = 'mac'
 			vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
@@ -181,7 +181,7 @@ function create_MainDialog()
 
    	savedStreamers = loadStreamersFromConfig()
    	widget_table['streamer_favourites_dropdown']:add_value('----', 0)
-   	if savedStreamers ~= nil then
+   	if savedStreamers then
    		for key, value in ipairs(savedStreamers) do
    			add_to_streamerDropdown(key, value)
    		end
@@ -221,7 +221,7 @@ function show_Update()
 end
 
 function close_dlg()
-	if dlg ~= nil then 
+	if dlg then 
 		--~ dlg:delete() -- Throw an error
 		dlg:hide() 
 	end
@@ -243,7 +243,7 @@ function watch_Action()
   		input_string = savedStreamers[dropdown_string]
   	end
   	vlc.msg.dbg(input_string)
-  	if input_string ~= '' and input_string ~= nil then
+  	if input_string ~= '' and input_string then
   		local cmd = ''
   		vlc.msg.dbg('Executing livestreamer command for ' .. vlclive.os)
   		if vlclive.os == 'win' then
@@ -316,7 +316,7 @@ end
 
 function addFav_Action()
 	local input_string = widget_table['streamer_name_input']:get_text()
-	if input_string ~= "" or input_string ~= nil then
+	if input_string ~= "" or input_string then
 		if not table_contains_item(savedStreamers, input_string) then
 			write_line(vlclive.path.configfile, input_string)
 			widget_table['streamer_favourites_dropdown']:add_value(input_string)
