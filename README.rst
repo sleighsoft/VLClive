@@ -1,17 +1,12 @@
 VLClive
 =======
 
-If you like it, consider donating :)
-
-.. image:: https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif
-    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55J29E7JKV3GU
-
 Overview
 --------
 
 VLClive is an extension that integrates livestreamer (https://github.com/chrippa/livestreamer)
 into the famous VLC media player.
-VLClive is written in LUA and uses the VLC Lua plugin interface.
+VLClive is written in Lua and uses the VLC Lua plugin interface.
 
 Current Capabilities
 --------------------
@@ -30,7 +25,7 @@ Installation
 1. Install Livestreamer: http://docs.livestreamer.io/install.html
 (If you use Windows, add it the the Path Variable as well!)
 
-2. Download the Lua file from /src/VLClive.lua from Github
+2. Download the Lua file from /src/VLClive.lua
 
 3. Place it in the correct folder:
 
@@ -42,9 +37,16 @@ Installation
 
 5. Please report all bugs immediately :)
 
+6. Thank you for giving it a shot, much appreciated
+
 
 Contributing
 ------------
 
 If you wish to report a bug or contribute code, please take a look
 at `CONTRIBUTING.rst <CONTRIBUTING.rst>`_ first.
+
+If you like it, consider donating :)
+
+.. image:: https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif
+    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55J29E7JKV3GU
