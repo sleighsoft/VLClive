@@ -14,9 +14,10 @@ Current Capabilities
 Note: VLClive currently only works with twitch.tv streams but it is planned to support all the streams
 that are available for livestreamer in the future.
 
-- Add/Remove your favourite streamer for fast access
+- Add/Remove your favourite streamers for quick access
+- Import all your favourite streamers from twitch.tv with one click
 - Quickly check if your favourite streamers are online
-- Use all available quality settings.
+- Use all available quality settings
 
 
 Installation
