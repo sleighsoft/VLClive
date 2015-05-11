@@ -351,7 +351,6 @@ function is_online(tStreamerNames)
     end
     stream = nil
     data = nil
-    online = nil
     return localStreamerTable
 end
 
@@ -381,6 +380,8 @@ function addTwitchFav_Action()
                 table.insert(savedStreamers, name)
             end
         end
+        stream = nil
+        data = nil
     end
 end
 
@@ -540,7 +541,7 @@ function update_extension_via_github()
     vlc.msg.dbg("Github version: " .. github_version_number .. " Local version: " .. local_version_number)
 
     if local_version_number < github_version_number then
-        vlc.msg.dbg('Update availabel at ' .. vlclive.githubSrcFile)
+        vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
         local stream = vlc.stream(vlclive.githubSrcFile)
         local data = ""
         local extension_file = io.open(vlclive.path.extension, "w+")
