@@ -1,4 +1,4 @@
--- 00000007
+-- 00000008
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -90,7 +90,7 @@ vlclive = {
     localSrcFileName = 'VLClive.lua',
     language = {
         de = {
-            streamer_name_label = "Streamer Kanal:",
+            streamer_name_label = "Einzelner Streamer:",
             streamer_add_button = "Hinzufügen",
             streamer_remove_button = "Entfernen",
             streamer_favourites_label = "Favoriten:",
@@ -100,11 +100,11 @@ vlclive = {
             update_label = "VLClive wurde aktualisiert. Bitte starten sie das Plugin neu",
             favourite_offline_text = "OFF",
             favourite_online_text = "ONLINE",
-            twitch_favourites_label = "Nutzer Favoriten:",
-            twitch_favourites_add_button = "Twitch Favorite hinzufügen"
+            twitch_favourites_label = "Importiere alle Favoriten des Nutzers:",
+            twitch_favourites_add_button = "Twitch Favoriten hinzufügen"
         },
         en = {
-            streamer_name_label = "Streamer Channel:",
+            streamer_name_label = "Single Streamer Channel:",
             streamer_add_button = "Add",
             streamer_remove_button = "Remove",
             streamer_favourites_label = "Favourites:",
@@ -114,8 +114,8 @@ vlclive = {
             update_label = "VLClive was updated. Please restart the plugin",
             favourite_offline_text = "OFF",
             favourite_online_text = "ONLINE",
-            twitch_favourites_label = "User favourites:",
-            twitch_favourites_add_button = "Add twitch favourites"
+            twitch_favourites_label = "Import all favourites of user:",
+            twitch_favourites_add_button = "Add Twitch favourites"
         }
     },
     gui_isOnlineRow = nil
