@@ -1,4 +1,4 @@
--- 00000008
+-- 00000009
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -98,8 +98,10 @@ vlclive = {
             livestreamer_quality_label = "Qualität:",
             watch_button = "Stream starten!",
             update_label = "VLClive wurde aktualisiert. Bitte starten sie das Plugin neu",
-            favourite_offline_text = "OFF",
-            favourite_online_text = "ONLINE",
+            favourite_offline_text = " (OFF)",
+            favourite_offline_indicator = "OFF",
+            favourite_online_text = " (ONLINE)",
+            favourite_online_indicator = "ONLINE",
             twitch_favourites_label = "Importiere alle Favoriten des Nutzers:",
             twitch_favourites_add_button = "Twitch Favoriten hinzufügen"
         },
@@ -112,8 +114,10 @@ vlclive = {
             livestreamer_quality_label = "Quality:",
             watch_button = "Watch stream!",
             update_label = "VLClive was updated. Please restart the plugin",
-            favourite_offline_text = "OFF",
-            favourite_online_text = "ONLINE",
+            favourite_offline_text = " (OFF)",
+            favourite_offline_indicator = "OFF",
+            favourite_online_text = " (ONLINE)",
+            favourite_online_indicator = "ONLINE",
             twitch_favourites_label = "Import all favourites of user:",
             twitch_favourites_add_button = "Add Twitch favourites"
         }
@@ -124,6 +128,7 @@ vlclive = {
 
 
 local widget_table = {}
+local isOnlineStreamerTable = {}
 local savedStreamers = nil
 local dlg = nil
 local current_LivestreamBaseName = vlclive.default.livestream_base_name
@@ -208,7 +213,7 @@ function create_MainDialog()
     vlclive.gui_isOnlineRow = row
     widget_table['streamer_favourites_label'] = dlg:add_label(vlclive.language[lang].streamer_favourites_label, 1, row, 1, 1)
     widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, row, 2, 1)
-    widget_table['streamer_online_button'] = dlg:add_button(vlclive.language[lang].streamer_online_button, refresh_Action, 4, row, 1, 1)
+    widget_table['streamer_online_button'] = dlg:add_button(vlclive.language[lang].streamer_online_button, isOnline_Action, 4, row, 1, 1)
     -- Fourth row
     row = row + 1;
     widget_table['livestreamer_quality_label'] = dlg:add_label(vlclive.language[lang].livestreamer_quality_label, 1, row, 1, 1)
@@ -279,8 +284,15 @@ function watch_Action()
     if dropdown_string == 0 then
         dropdown_string = ''
     else
-        input_string = savedStreamers[dropdown_string]
-    end
+        input_string = isOnlineStreamerTable[dropdown_string]
+        if not input_string then
+            input_string = savedStreamers[dropdown_string]
+        end
+        for name in string.gfind(input_string, "([a-zA-Z0-9_]+)") do
+            input_string = name
+            break
+        end
+    end    
     vlc.msg.dbg(input_string)
     if input_string ~= '' and input_string then
         local cmd = ''
@@ -303,7 +315,7 @@ function watch_Action()
     end
 end
 
-function refresh_Action()
+function isOnline_Action()
     local row = vlclive.gui_isOnlineRow
     dlg:del_widget(widget_table['streamer_favourites_dropdown'])
     dlg:del_widget(widget_table['streamer_online_button'])
@@ -311,12 +323,15 @@ function refresh_Action()
     dlg:update()
     widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, row, 2, 1)
     widget_table['streamer_favourites_dropdown']:add_value("----", 0)
-    local tStreamerNames = is_online(savedStreamers)
-    for key,value in ipairs(tStreamerNames) do
+    for k,v in ipairs(savedStreamers) do
+        vlc.msg.err("SAVED!::" .. k .. "::" .. v)
+    end
+    isOnlineStreamerTable = is_online(savedStreamers)
+    for key,value in ipairs(isOnlineStreamerTable) do
         widget_table['streamer_favourites_dropdown']:add_value(value, key)
     end
     dlg:del_widget(loadingLabel)
-    widget_table['streamer_online_button'] = dlg:add_button('Is Online?', refresh_Action, 4, row, 1, 1)
+    widget_table['streamer_online_button'] = dlg:add_button('Is Online?', isOnline_Action, 4, row, 1, 1)
 end
 
 function add_to_streamerDropdown(index)
@@ -347,26 +362,26 @@ function is_online(tStreamerNames)
         for key,value in ipairs(localStreamerTable) do
             local online = string.find(data, '"display_name":"' .. string.lower(value) .. '"')
             if not online then
-                localStreamerTable[key] = value .. ' (' .. vlclive.language[vlclive.default.language].favourite_offline_text .. ')'
+                localStreamerTable[key] = value .. vlclive.language[vlclive.default.language].favourite_offline_text
             else
                 onlineCount = onlineCount + 1
-                localStreamerTable[key] = value .. ' (' .. vlclive.language[vlclive.default.language].favourite_online_text .. ')'
+                localStreamerTable[key] = value .. vlclive.language[vlclive.default.language].favourite_online_text
             end 
         end
     end
     local sortedByOnline = true -- This is a placeholder, maybe a settings page will be added later which enables configuration of this value
     if sortedByOnline then
         local sortedStreamerTable = {}
-        local onlineIndex = 0
-        local offlineIndex = onlineCount
+        local onlineIndex = 1
+        local offlineIndex = onlineCount + 1
         for key,value in ipairs(localStreamerTable) do
-            if string.find(value, vlclive.language[vlclive.default.language].favourite_offline_text) then
+            if string.find(value, vlclive.language[vlclive.default.language].favourite_offline_indicator) then
                 sortedStreamerTable[offlineIndex] = value
-                vlc.msg.dbg("Offline @" .. offlineIndex .. " ::: " .. value)
+                vlc.msg.err("Offline @" .. offlineIndex .. " ::: " .. value)
                 offlineIndex = offlineIndex + 1
             else
                 sortedStreamerTable[onlineIndex] = value
-                vlc.msg.dbg("Online @" .. onlineIndex .. " ::: " .. value)
+                vlc.msg.err("Online @" .. onlineIndex .. " ::: " .. value)
                 onlineIndex = onlineIndex + 1
             end
         end
