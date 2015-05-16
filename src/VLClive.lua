@@ -1,4 +1,4 @@
--- 00000009
+-- 00000010
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -20,49 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 --]]
 
-function descriptor()
-    return {
-        title = "VLClive",
-        version = vlclive.version,
-        author = "Julian Niedermeier",
-        url = 'http://',
-        shortdesc = "VLClive",
-        description = "Integrates Livestreamer into VLC for easier handling of twitch.tv streams (more to come)",
-        capabilities = {"menu", "input-listener", "meta-listener"}
-    }
-end
-
-
-function activate()
-    -- this is where extension starts
-    -- for example activation of extension opens custom dialog box:
-    setup()
-    if not update_extension_via_github() then
-        show_Main()
-    else
-        show_Update()
-    end
-end
-
-function deactivate()
-    -- what should be done on deactivation of extension
-end
-
-function close()
-    -- function triggered on dialog box close event
-    -- for example to deactivate extension on dialog box close:
-    vlc.deactivate()
-end
-
-function input_changed()
-    -- related to capabilities={"input-listener"} in descriptor()
-    -- triggered by Start/Stop media input event
-end
-
-function playing_changed()
-    -- related to capabilities={"playing-listener"} in descriptor()
-    -- triggered by Pause/Play madia input event
-end
+-- ******************************
+-- *                            *
+-- *  Setup functions below     *
+-- *                            *
+-- ******************************
 
 vlclive = {
     version = 'v1.0',
@@ -74,58 +36,62 @@ vlclive = {
     path = {
         userdir = nil,
         configfile = nil,
-        livestreamer = "livestreamer",
+        livestreamer = 'livestreamer',
         extension = nil,
         vlcexe = nil
     },
     quality = {
         twitch = {
-            "Source", "High", "Medium", "Low", "Mobile", "Audio"
+            'Source', 'High', 'Medium', 'Low', 'Mobile', 'Audio'
         }
     },
     livestreamBaseURLs = {
-        twitch = "twitch.tv/"
+        twitch = 'twitch.tv/'
     },
-    githubSrcFile = "https://raw.githubusercontent.com/sleighsoft/VLClive/master/src/VLClive.lua",
+    githubSrcFile = 'https://raw.githubusercontent.com/sleighsoft/VLClive/master/src/VLClive.lua',
     localSrcFileName = 'VLClive.lua',
     language = {
         de = {
-            streamer_name_label = "Einzelner Streamer:",
-            streamer_add_button = "Hinzufügen",
-            streamer_remove_button = "Entfernen",
-            streamer_favourites_label = "Favoriten:",
-            streamer_online_button = "Online?",
-            livestreamer_quality_label = "Qualität:",
-            watch_button = "Stream starten!",
-            update_label = "VLClive wurde aktualisiert. Bitte starten sie das Plugin neu",
-            favourite_offline_text = " (OFF)",
-            favourite_offline_indicator = "OFF",
-            favourite_online_text = " (ONLINE)",
-            favourite_online_indicator = "ONLINE",
-            twitch_favourites_label = "Importiere alle Favoriten des Nutzers:",
-            twitch_favourites_add_button = "Twitch Favoriten hinzufügen"
+            streamer_name_label = 'Einzelner Streamer:',
+            streamer_add_button = 'Hinzufügen',
+            streamer_remove_button = 'Entfernen',
+            streamer_favourites_label = 'Favoriten:',
+            streamer_online_button = 'Online?',
+            streamer_online_loading_label = 'Lade ...',
+            livestreamer_quality_label = 'Qualität:',
+            watch_button = 'Stream starten!',
+            update_label = 'VLClive wurde soeben aktualisiert. Bitte starten sie die Erweiterung neu!',
+            favourite_offline_text = ' (OFF)',
+            favourite_offline_indicator = 'OFF',
+            favourite_online_text = ' (ONLINE)',
+            favourite_online_indicator = 'ONLINE',
+            twitch_favourites_label = 'Importiere alle Favoriten des Nutzers:',
+            twitch_favourites_add_button = 'Twitch Favoriten hinzufügen',
+            dialog_update_title = 'VLClive aktualisiert!',
+            dialog_settings_title = 'VLClive Einstellungen'
         },
         en = {
-            streamer_name_label = "Single Streamer Channel:",
-            streamer_add_button = "Add",
-            streamer_remove_button = "Remove",
-            streamer_favourites_label = "Favourites:",
-            streamer_online_button = "Online?",
-            livestreamer_quality_label = "Quality:",
-            watch_button = "Watch stream!",
-            update_label = "VLClive was updated. Please restart the plugin",
-            favourite_offline_text = " (OFF)",
-            favourite_offline_indicator = "OFF",
-            favourite_online_text = " (ONLINE)",
-            favourite_online_indicator = "ONLINE",
-            twitch_favourites_label = "Import all favourites of user:",
-            twitch_favourites_add_button = "Add Twitch favourites"
+            streamer_name_label = 'Single Streamer Channel:',
+            streamer_add_button = 'Add',
+            streamer_remove_button = 'Remove',
+            streamer_favourites_label = 'Favourites:',
+            streamer_online_button = 'Online?',
+            streamer_online_loading_label = 'Loading ...',
+            livestreamer_quality_label = 'Quality:',
+            watch_button = 'Watch stream!',
+            update_label = 'VLClive was updated. Please restart the plugin',
+            favourite_offline_text = ' (OFF)',
+            favourite_offline_indicator = 'OFF',
+            favourite_online_text = ' (ONLINE)',
+            favourite_online_indicator = 'ONLINE',
+            twitch_favourites_label = 'Import all favourites of user:',
+            twitch_favourites_add_button = 'Add Twitch favourites',
+            dialog_update_title = 'VLClive updated!',
+            dialog_settings_title = 'VLClive Settings'
         }
     },
     gui_isOnlineRow = nil
 }
-
-
 
 local widget_table = {}
 local isOnlineStreamerTable = {}
@@ -135,49 +101,37 @@ local current_LivestreamBaseName = vlclive.default.livestream_base_name
 local current_LivestreamBaseURL = vlclive.livestreamBaseURLs[current_LivestreamBaseName]
 local current_QualitySettings = vlclive.quality[current_LivestreamBaseName]
 
-
--- Custom part, Dialog box example: -------------------------
-
+-- Configures path variables
 function setup()
+    -- Setup pathes
     local datadir = vlc.config.datadir()
     local userdatadir = vlc.config.userdatadir()
-
-    vlc.msg.dbg("VLC datadir: " .. datadir)
-    vlc.msg.dbg("VLC userdatadir: " .. userdatadir)
+    local path_generic = {'lua', 'extensions', 'userdata', 'vlclive'}
 
     -- Determine operating system
     if is_window_path(datadir) then
         vlclive.os = 'win'
         slash = '\\'
-    elseif string.find(datadir, 'MacOS') then
-        vlclive.os = 'mac'
-        slash = '/'
-    else
-        -- Check for Mac specific code later
-        vlclive.os = 'lin'
-        slash = '/'
-    end
-
-    vlc.msg.dbg('Detected OS is: ' .. vlclive.os)
-
-    -- Setup pathes
-    local path_generic = {"lua", "extensions", "userdata", "vlclive"}
-    vlclive.path.userdir = userdatadir .. slash .. table.concat(path_generic, slash) .. slash
-    vlclive.path.configfile = vlclive.path.userdir .. 'vlclive.config'
-    
-    if vlclive.os == 'win' then
         vlclive.path.vlcexe = datadir .. slash .. 'vlc.exe'
         vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
+    elseif string.find(datadir, 'MacOS') then
+        -- Assumes the extension is located in a path like ../VLC.app/Contents/MacOS/..
+        vlclive.os = 'mac'
+        slash = '/'
+        vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
     else
-        if vlclive.os == 'mac' then
-            vlclive.path.vlcexe = string.gsub(datadir, 'share', 'VLC')
-            vlclive.path.extension = datadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
-        else
-            -- Linux like path
-            vlclive.path.extension = userdatadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
-        end
+        vlclive.os = 'lin'
+        slash = '/'
+        vlclive.path.extension = userdatadir .. slash .. 'lua' .. slash .. 'extensions' .. slash .. vlclive.localSrcFileName
     end
 
+    vlclive.path.userdir = userdatadir .. slash .. table.concat(path_generic, slash) .. slash
+    vlclive.path.configfile = vlclive.path.userdir .. 'vlclive.config'
+
+    vlc.msg.dbg('VLC datadir: ' .. datadir)
+    vlc.msg.dbg('VLC userdatadir: ' .. userdatadir)
+
+    -- Create the directory where the exention's settings are stored
     if vlclive.path.userdir then
         if not is_dir(vlclive.path.userdir) then
             mkdir_p(vlclive.path.userdir)
@@ -185,17 +139,66 @@ function setup()
         end
     end
 
+    -- Create the file that saves all favourite streamers if neccessary
     if vlclive.path.configfile then
         if not file_exist(vlclive.path.configfile) then
             local fconf = io.open(vlclive.path.configfile, 'w')
             fconf:write('')
             fconf:close()
-            vlc.msg.dbg('Created configfile at ' .. vlclive.path.configfile)
         end
+    end
+    vlc.msg.dbg('Configfile at ' .. vlclive.path.configfile)
+end
+
+-- ******************************
+-- *                            *
+-- *  VLC extension functions   *
+-- *  below                     *
+-- *                            *
+-- ******************************
+
+-- VLC specific. Used to describe the extension
+function descriptor()
+    return {
+        title = 'VLClive',
+        version = vlclive.version,
+        author = 'Julian Niedermeier',
+        url = 'http://',
+        shortdesc = 'VLClive',
+        description = 'Integrates Livestreamer into VLC for easier handling of twitch.tv streams (more to come)',
+        capabilities = {'menu'}
+    }
+end
+
+-- VLC specific. Called on extension startup
+function activate()
+    setup()
+    if not update_extension_via_github() then
+        show_Main()
+    else
+        show_Update()
     end
 end
 
+-- VLC specific. Called on extension deactivation
+function deactivate()
+    -- TODO?
+end
+
+-- VLC specific. Called when the extension is closed
+function close()
+    vlc.deactivate()
+end
+
+-- ******************************
+-- *                            *
+-- *  UI dialog functions below *
+-- *                            *
+-- ******************************
+
+-- Initializes the dialog for the main ui
 function create_MainDialog()
+    -- START SETUP FOR MAIN UI --
     local row = 1
     local lang = vlclive.default.language
     -- First row
@@ -219,17 +222,18 @@ function create_MainDialog()
     widget_table['livestreamer_quality_label'] = dlg:add_label(vlclive.language[lang].livestreamer_quality_label, 1, row, 1, 1)
     widget_table['livestreamer_quality_dropdown'] = dlg:add_dropdown(2, row, 2, 1)
     widget_table['watch_button'] = dlg:add_button(vlclive.language[lang].watch_button, watch_Action, 5, row, 1, 1)
+    -- END SETUP FOR MAIN UI --
 
-    -- Add availabel quality settings to the dropdown
-    for key, value in ipairs(current_QualitySettings) do
-        add_to_qualityDropdown(key, value)
+    -- Add available quality settings to the dropdown
+    for k,v in ipairs(current_QualitySettings) do
+        add_to_qualityDropdown(k,v)
     end
 
-    savedStreamers = loadStreamersFromConfig()
+    savedStreamers = loadStreamersFromConfig(vlclive.path.configfile)
     widget_table['streamer_favourites_dropdown']:add_value('----', 0)
     if savedStreamers then
-        for key, value in ipairs(savedStreamers) do
-            add_to_streamerDropdown(key, value)
+        for k,v in ipairs(savedStreamers) do
+            add_to_streamerDropdown(k,v)
         end
     else
         savedStreamers = nil
@@ -241,9 +245,13 @@ function create_UpdateDialog()
 end
 
 function create_SettingsDialog()
-    -- Maybe later
+    -- TODO
+    -- Loading and saving of settings (xml library included in vlc lua)
+    -- Setting the default language
+    -- Setting the kind of ordering in the streamer favourite list (online first, #viewer first)
 end
 
+-- This function is used to control which dialog is displayed
 function trigger_menu(dlgId)
     if dlgId == 1 then
         close_dlg()
@@ -251,8 +259,12 @@ function trigger_menu(dlgId)
         create_MainDialog()
     elseif dlgId == 2 then
         close_dlg()
-        dlg = vlc.dialog('Extension Updated!')
+        dlg = vlc.dialog(vlclive.language[vlclive.default.language].dialog_update_title)
         create_UpdateDialog()
+    elseif dlgId == 3 then
+        close_dlg()
+        dlg = vlc.dialog(vlclive.language[vlclive.default.language].dialog_settings_title)
+        show_Settings()
     end
 end
 
@@ -264,9 +276,13 @@ function show_Update()
     trigger_menu(2)
 end
 
+function show_Settings()
+    trigger_menu(3)
+end
+
 function close_dlg()
     if dlg then 
-        --~ dlg:delete() -- Throw an error
+        -- dlg:delete() -- Throw an error
         dlg:hide() 
     end
     
@@ -276,11 +292,14 @@ function close_dlg()
     collectgarbage() --~ !important 
 end
 
+-- Starts livestreamer with the selected streamer and quality setting
+-- Dropdown menu selection overwrites a string input in 'streamer_name_input'
 function watch_Action()
     local input_string = widget_table['streamer_name_input']:get_text()
     local dropdown_string = widget_table['streamer_favourites_dropdown']:get_value()
     local quality_string = widget_table['livestreamer_quality_dropdown']:get_value()
     quality_string = current_QualitySettings[quality_string]
+
     if dropdown_string == 0 then
         dropdown_string = ''
     else
@@ -288,26 +307,22 @@ function watch_Action()
         if not input_string then
             input_string = savedStreamers[dropdown_string]
         end
-        for name in string.gfind(input_string, "([a-zA-Z0-9_]+)") do
+        for name in string.gfind(input_string, '([a-zA-Z0-9_]+)') do
             input_string = name
             break
         end
     end    
-    vlc.msg.dbg(input_string)
+    vlc.msg.dbg('Selected streamer: ' .. input_string)
     if input_string ~= '' and input_string then
         local cmd = ''
+        vlc.msg.dbg('Livestreamer: ' .. vlclive.path.livestreamer)
+        vlc.msg.dbg('BaseURL: ' .. current_LivestreamBaseURL)
+        vlc.msg.dbg('Quality: ' .. quality_string)
         if vlclive.os == 'win' then
             cmd = 'start /min "" "' .. vlclive.path.livestreamer .. '" ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string .. ' --player "' .. vlclive.path.vlcexe .. '" & exit'
         elseif vlclive.os == 'mac' then
-            vlc.msg.dbg("Livestreamer: " .. vlclive.path.livestreamer)
-            vlc.msg.dbg("BaseURL: " .. current_LivestreamBaseURL)
-            vlc.msg.dbg("Quality: " .. quality_string)
-            vlc.msg.dbg("Exepath: " .. vlclive.path.vlcexe)
-            cmd = "osascript -e 'tell application \"Terminal\" to do script \"" .. vlclive.path.livestreamer .. ' ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string .. " && exit\"'"
+            cmd = 'osascript -e \'tell application \"Terminal\" to do script \"' .. vlclive.path.livestreamer .. ' ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string .. ' && exit\"\''
         elseif vlclive.os == 'lin' then
-            vlc.msg.dbg("Livestreamer: " .. vlclive.path.livestreamer)
-            vlc.msg.dbg("BaseURL: " .. current_LivestreamBaseURL)
-            vlc.msg.dbg("Quality: " .. quality_string)
             cmd = vlclive.path.livestreamer .. ' ' .. current_LivestreamBaseURL .. input_string .. ' ' .. quality_string
         end
         vlc.msg.dbg(cmd)
@@ -315,23 +330,21 @@ function watch_Action()
     end
 end
 
+-- Check if the streamer in the dropdown menu are online and adds an indicator to each of them
 function isOnline_Action()
     local row = vlclive.gui_isOnlineRow
     dlg:del_widget(widget_table['streamer_favourites_dropdown'])
     dlg:del_widget(widget_table['streamer_online_button'])
-    loadingLabel = dlg:add_label('Loading...', 4, row, 1, 1)
+    loadingLabel = dlg:add_label(vlclive.language[vlclive.default.language].streamer_online_loading_label, 4, row, 1, 1)
     dlg:update()
     widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, row, 2, 1)
     widget_table['streamer_favourites_dropdown']:add_value("----", 0)
-    for k,v in ipairs(savedStreamers) do
-        vlc.msg.err("SAVED!::" .. k .. "::" .. v)
-    end
     isOnlineStreamerTable = is_online(savedStreamers)
     for key,value in ipairs(isOnlineStreamerTable) do
         widget_table['streamer_favourites_dropdown']:add_value(value, key)
     end
     dlg:del_widget(loadingLabel)
-    widget_table['streamer_online_button'] = dlg:add_button('Is Online?', isOnline_Action, 4, row, 1, 1)
+    widget_table['streamer_online_button'] = dlg:add_button(vlclive.language[vlclive.default.language].streamer_online_button, isOnline_Action, 4, row, 1, 1)
 end
 
 function add_to_streamerDropdown(index)
@@ -350,10 +363,10 @@ function is_online(tStreamerNames)
     -- Copy the table to not affect the table that is used for querying
     local localStreamerTable = table_shallow_copy(tStreamerNames)
     local requestURL = 'https://api.twitch.tv/kraken/streams?channel='
-    for key,value in ipairs(localStreamerTable) do
-        requestURL = requestURL .. value .. ","
+    for _,v in ipairs(localStreamerTable) do
+        requestURL = requestURL .. v .. ","
     end
-    vlc.msg.dbg(requestURL)
+    vlc.msg.dbg('Querying:: ' .. requestURL)
     local stream = vlc.stream(requestURL)
     local data = stream:readline()
     local onlineCount = 0
@@ -369,19 +382,17 @@ function is_online(tStreamerNames)
             end 
         end
     end
-    local sortedByOnline = true -- This is a placeholder, maybe a settings page will be added later which enables configuration of this value
+    local sortedByOnline = true -- TODO: This is a placeholder, maybe a settings page will be added later which enables configuration of this value
     if sortedByOnline then
         local sortedStreamerTable = {}
         local onlineIndex = 1
         local offlineIndex = onlineCount + 1
-        for key,value in ipairs(localStreamerTable) do
-            if string.find(value, vlclive.language[vlclive.default.language].favourite_offline_indicator) then
-                sortedStreamerTable[offlineIndex] = value
-                vlc.msg.err("Offline @" .. offlineIndex .. " ::: " .. value)
+        for _,v in ipairs(localStreamerTable) do
+            if string.find(v, vlclive.language[vlclive.default.language].favourite_offline_indicator) then
+                sortedStreamerTable[offlineIndex] = v
                 offlineIndex = offlineIndex + 1
             else
-                sortedStreamerTable[onlineIndex] = value
-                vlc.msg.err("Online @" .. onlineIndex .. " ::: " .. value)
+                sortedStreamerTable[onlineIndex] = v
                 onlineIndex = onlineIndex + 1
             end
         end
@@ -403,7 +414,7 @@ function addFav_Action()
     end
 end
 
--- Adds every user the user that has been entered follows to the local favourites list
+-- Queries twitch api for a list of all people the entered user follows and adds them to the list of favourite streamer
 function addTwitchFav_Action()
     local input_string = widget_table['twitch_favourites_input']:get_text()
     if input_string then
@@ -417,7 +428,6 @@ function addTwitchFav_Action()
                 if isFirst then
                     for num in string.gfind(data, '"_total":([0-9]+)') do
                         number_of_items = num
-                        vlc.msg.err(number_of_items)
                     end
                     isFirst = false
                 end
@@ -435,6 +445,7 @@ function addTwitchFav_Action()
     end
 end
 
+-- Helper function to query twitch's /users/<user>/follows/channels rest api
 function getTwitchFavByUser(user, offset, limit)
     local requestURL = 'https://api.twitch.tv/kraken/users/'
     requestURL = requestURL .. user .. '/follows/channels?limit=' .. limit .. '&offset=' .. offset
@@ -458,15 +469,15 @@ function removeFav_Action()
     dlg:del_widget(widget_table['streamer_favourites_dropdown'])
     widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, 2, 2, 1)
     widget_table['streamer_favourites_dropdown']:add_value('----', 0)
-    for key, value in ipairs(savedStreamers, add_to_streamerDropdown) do
-        add_to_streamerDropdown(key, value)
+    for k,v in ipairs(savedStreamers, add_to_streamerDropdown) do
+        add_to_streamerDropdown(k,v)
     end
 end
 
 function table_contains_item(table, item)
-    for key,value in ipairs(table) do
-        if value == item then
-            return key
+    for k,v in ipairs(table) do
+        if v == item then
+            return k
         end
     end
     return nil
@@ -480,9 +491,46 @@ function table_shallow_copy(t)
     return t2
 end
 
-function loadStreamersFromConfig()
-    return read_lines(vlclive.path.configfile)
+function loadStreamersFromConfig(pathToConfig)
+    return read_lines(pathToConfig)
 end
+
+function update_extension_via_github()
+    -- check online github version number
+    local stream = vlc.stream(vlclive.githubSrcFile)
+    local data = stream:readline()
+    stream = nil
+    local github_version_number = string.gsub(data, '-- ', '')
+    data = nil
+    -- check local version number
+    local local_version_number = string.gsub(read_line(vlclive.path.extension), '-- ', '')
+    vlc.msg.dbg('Github version: ' .. github_version_number .. ' Local version: ' .. local_version_number)
+
+    if local_version_number < github_version_number then
+        vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
+        local stream = vlc.stream(vlclive.githubSrcFile)
+        local data = ""
+        local extension_file = io.open(vlclive.path.extension, 'w+')
+                
+        while data do
+            extension_file:write(data)
+            data = stream:read(65536)
+        end
+
+        extension_file:flush()
+        extension_file:close()
+        stream = nil
+        collectgarbage()
+        return true
+    end
+    return false
+end
+
+-- ******************************
+-- *                            *
+-- *  Utility functions below   *
+-- *                            *
+-- ******************************
 
 function read_line(filepath)
     if file_exist(filepath) then
@@ -553,34 +601,35 @@ function mkdir_p(path) -- create a directory windows or linux via commandline
     if not path or trim(path) == ''
     then return false end
     vlc.msg.dbg(vlclive.os)
-    if vlclive.os == 'win' then
+    if isWin() then
         os.execute('mkdir "' .. path ..'"')
-    elseif vlclive.os == "lin" or vlclive.os == "mac" then
-        os.execute("mkdir -p '" .. path .."'")
+    elseif isLinux() or isMac() then
+        os.execute('mkdir -p \'' .. path .. '\'')
     end
 end
 
 function trim(str)
-    if not str then return "" end
-    return string.gsub(str, "^[\r\n%s]*(.-)[\r\n%s]*$", "%1")
+    if not str then return '' end
+    return string.gsub(str, '^[\r\n%s]*(.-)[\r\n%s]*$', '%1')
 end
 
 function is_win_safe(path)
-    if not path or trim(path) == "" 
-    or not is_window_path(path)
-    then return false end
-    return string.match(path, "^%a?%:?[\\%w%p%s§¤]+$")
+    if not path or trim(path) == '' or not is_window_path(path) then 
+        return false
+    end
+    return string.match(path, '^%a?%:?[\\%w%p%s§¤]+$')
 end
 
 function is_dir(path) -- checks if given path is a directory
-    if not path or trim(path) == "" 
-    then return false end
+    if not path or trim(path) == '' then
+        return false
+    end
     -- Remove slash at the end or it won't work on Windows
-    path = string.gsub(path, "^(.-)[\\/]?$", "%1")
-    local f, _, code = io.open(path, "rb")
+    path = string.gsub(path, '^(.-)[\\/]?$', '%1')
+    local f, _, code = io.open(path, 'rb')
     
     if f then 
-        _, _, code = f:read("*a")
+        _, _, code = f:read('*a')
         f:close()
         if code == 21 then
             return true
@@ -592,32 +641,22 @@ function is_dir(path) -- checks if given path is a directory
     return false
 end
 
-function update_extension_via_github()
-    -- check online github version number
-    local stream = vlc.stream(vlclive.githubSrcFile)
-    local data = stream:readline()
-    stream = nil
-    local github_version_number = string.gsub(data, '-- ', '')
-    data = nil
-    -- check local version number
-    local local_version_number = string.gsub(read_line(vlclive.path.extension), '-- ', '')
-    vlc.msg.dbg("Github version: " .. github_version_number .. " Local version: " .. local_version_number)
+function isMac()
+    if vlclive.os == 'mac' then
+        return true
+    end
+    return false
+end
 
-    if local_version_number < github_version_number then
-        vlc.msg.dbg('Update available at ' .. vlclive.githubSrcFile)
-        local stream = vlc.stream(vlclive.githubSrcFile)
-        local data = ""
-        local extension_file = io.open(vlclive.path.extension, "w+")
-                
-        while data do
-            extension_file:write(data)
-            data = stream:read(65536)
-        end
+function isWin()
+    if vlclive.os == 'win' then
+        return true
+    end
+    return false
+end
 
-        extension_file:flush()
-        extension_file:close()
-        stream = nil
-        collectgarbage()
+function isLinux()
+    if vlclive.os == 'lin' then
         return true
     end
     return false
