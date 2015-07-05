@@ -1,4 +1,4 @@
--- 00000010
+-- 00000011
 -- Increment the above number by 1 to enable auto update at next extension startup
 --[[
 The MIT License (MIT)
@@ -467,7 +467,7 @@ function removeFav_Action()
         write_lines(vlclive.path.configfile, savedStreamers)
     end
     dlg:del_widget(widget_table['streamer_favourites_dropdown'])
-    widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, 2, 2, 1)
+    widget_table['streamer_favourites_dropdown'] = dlg:add_dropdown(2, vlclive.gui_isOnlineRow, 2, 1)
     widget_table['streamer_favourites_dropdown']:add_value('----', 0)
     for k,v in ipairs(savedStreamers, add_to_streamerDropdown) do
         add_to_streamerDropdown(k,v)
