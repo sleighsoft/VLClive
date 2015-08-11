@@ -46,8 +46,3 @@ Contributing
 
 If you wish to report a bug or contribute code, please take a look
 at `CONTRIBUTING.rst <CONTRIBUTING.rst>`_ first.
-
-If you like it, consider donating :)
-
-.. image:: https://www.paypalobjects.com/de_DE/DE/i/btn/btn_donate_SM.gif
-    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55J29E7JKV3GU
